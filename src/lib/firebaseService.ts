@@ -9,12 +9,9 @@
 import { 
   collection, 
   getDocs, 
-  getDoc,
-  doc,
   query,
   where,
-  orderBy,
-  limit
+  orderBy
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Product, Promotion, Review } from '@/types';
