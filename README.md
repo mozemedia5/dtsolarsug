@@ -96,13 +96,7 @@ npm run lint
 3. **Add Environment Variables**
    - In the "Environment Variables" section, add all Firebase credentials:
      ```
-     VITE_FIREBASE_API_KEY=AIzaSyA5ymAuOnSgjh66jGW19nFu-fHICcVBXdQ
-     VITE_FIREBASE_AUTH_DOMAIN=dt-solars.firebaseapp.com
-     VITE_FIREBASE_PROJECT_ID=dt-solars
-     VITE_FIREBASE_STORAGE_BUCKET=dt-solars.firebasestorage.app
-     VITE_FIREBASE_MESSAGING_SENDER_ID=635043180373
-     VITE_FIREBASE_APP_ID=1:635043180373:web:c7e63f1134b7fffef009dc
-     ```
+     `
    - Select which environments to apply to: Production, Preview, or Development
 
 4. **Deploy**
