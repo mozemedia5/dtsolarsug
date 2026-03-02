@@ -28,12 +28,7 @@ Both branches now have proper environment variable setup:
 
 #### Firebase Configuration Values
 ```env
-VITE_FIREBASE_API_KEY=AIzaSyA5ymAuOnSgjh66jGW19nFu-fHICcVBXdQ
-VITE_FIREBASE_AUTH_DOMAIN=dt-solars.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=dt-solars
-VITE_FIREBASE_STORAGE_BUCKET=dt-solars.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=635043180373
-VITE_FIREBASE_APP_ID=1:635043180373:web:c7e63f1134b7fffef009dc
+
 ```
 
 ### 3. Vercel Deployment Configuration
@@ -88,14 +83,7 @@ All changes have been committed and pushed to GitHub:
    - **Project Name**: `dtsolarsug` (or your preferred name)
    - **Framework Preset**: Vite (auto-detected)
 5. Add Environment Variables:
-   - `VITE_FIREBASE_API_KEY`: `AIzaSyA5ymAuOnSgjh66jGW19nFu-fHICcVBXdQ`
-   - `VITE_FIREBASE_AUTH_DOMAIN`: `dt-solars.firebaseapp.com`
-   - `VITE_FIREBASE_PROJECT_ID`: `dt-solars`
-   - `VITE_FIREBASE_STORAGE_BUCKET`: `dt-solars.firebasestorage.app`
-   - `VITE_FIREBASE_MESSAGING_SENDER_ID`: `635043180373`
-   - `VITE_FIREBASE_APP_ID`: `1:635043180373:web:c7e63f1134b7fffef009dc`
-6. Click "Deploy"
-7. Your customer website will be live at: `https://dtsolarsug.vercel.app`
+   - ` customer website will be live at: `https://dtsolarsug.vercel.app`
 
 #### For Admin Branch (Admin Dashboard)
 1. Click "Add New" → "Project" again
