@@ -18,7 +18,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { products, categoryLabels } from '@/data';
+import { useProducts, categoryLabels } from '@/hooks/useFirebaseData';
 import type { Product } from '@/types';
 import { ProductImage } from '@/components/shared/ProductImage';
 
@@ -40,6 +40,9 @@ export function Products({ onPageChange }: ProductsProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [likedProducts, setLikedProducts] = useState<Set<string>>(new Set());
+  
+  // Fetch products from Firebase
+  const { products, loading, error } = useProducts();
 
   const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
@@ -77,6 +80,24 @@ export function Products({ onPageChange }: ProductsProps) {
       </div>
 
       <div className="container mx-auto px-4">
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-900/20 border border-red-900/50 text-red-400 p-4 rounded-lg mb-6">
+            {error}. Please try again later.
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center text-slate-400 py-12">
+            <div className="inline-block w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p>Loading products...</p>
+          </div>
+        )}
+
+        {/* Content - only show when not loading */}
+        {!loading && (
+          <>
         {/* Search and Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
@@ -258,6 +279,8 @@ export function Products({ onPageChange }: ProductsProps) {
             <h3 className="text-white font-medium mb-2">No products found</h3>
             <p className="text-slate-400 text-sm">Try adjusting your search or filter</p>
           </div>
+        )}
+        </>
         )}
       </div>
 

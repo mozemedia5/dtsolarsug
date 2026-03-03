@@ -15,8 +15,7 @@ import {
   updateDoc,
   query,
   where,
-  orderBy,
-  increment
+  orderBy
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Product, Promotion, Review } from '@/types';

@@ -13,7 +13,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { promotions, getFeaturedProducts, branches } from '@/data';
+import { branches } from '@/data';
+import { usePromotions, useFeaturedProducts } from '@/hooks/useFirebaseData';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 
@@ -26,6 +27,10 @@ export function Home({ onPageChange }: HomeProps) {
     Autoplay({ delay: 5000, stopOnInteraction: false })
   ]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  
+  // Fetch data from Firebase
+  const { promotions: activePromotions, loading: promotionsLoading } = usePromotions();
+  const { featuredProducts, loading: productsLoading } = useFeaturedProducts();
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
@@ -49,8 +54,6 @@ export function Home({ onPageChange }: HomeProps) {
     };
   }, [emblaApi, onSelect]);
 
-  const featuredProducts = getFeaturedProducts();
-  const activePromotions = promotions;
   const mainBranch = branches.find(b => b.isMain) || branches[0];
 
   const formatPrice = (price: number) => {
@@ -172,9 +175,15 @@ export function Home({ onPageChange }: HomeProps) {
           </div>
         </div>
 
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex gap-4">
-            {activePromotions.map((promo) => (
+        {promotionsLoading ? (
+          <div className="text-center text-slate-400 py-12">Loading promotions...</div>
+        ) : activePromotions.length === 0 ? (
+          <div className="text-center text-slate-400 py-12">No active promotions at this time</div>
+        ) : (
+          <>
+            <div className="overflow-hidden" ref={emblaRef}>
+              <div className="flex gap-4">
+                {activePromotions.map((promo) => (
               <div key={promo.id} className="flex-[0_0_100%] sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] min-w-0">
                 <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 overflow-hidden group cursor-pointer hover:border-orange-500/50 transition-all">
                   <div className="relative h-40 bg-gradient-to-br from-orange-500/20 to-amber-500/20 flex items-center justify-center">
@@ -219,6 +228,8 @@ export function Home({ onPageChange }: HomeProps) {
             />
           ))}
         </div>
+        </>
+        )}
       </section>
 
       {/* Featured Products */}
@@ -238,7 +249,12 @@ export function Home({ onPageChange }: HomeProps) {
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        {productsLoading ? (
+          <div className="text-center text-slate-400 py-12">Loading products...</div>
+        ) : featuredProducts.length === 0 ? (
+          <div className="text-center text-slate-400 py-12">No featured products available</div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           {featuredProducts.map((product) => (
             <Card 
               key={product.id} 
@@ -270,6 +286,7 @@ export function Home({ onPageChange }: HomeProps) {
             </Card>
           ))}
         </div>
+        )}
       </section>
 
       {/* Services Preview */}
