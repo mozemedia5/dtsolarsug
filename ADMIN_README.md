@@ -14,12 +14,17 @@ Administration dashboard for managing the DT Solars e-commerce platform. This br
 ### Product Management
 - ✅ Add, edit, and delete products
 - ✅ Product categories (Solar Kits, Batteries & Inverters, CCTV, Water Pumps, Home Electronics)
-- ✅ Image upload support
+- ✅ **Advanced image upload** with URL or file upload
+- ✅ **Social media image support** (Facebook, Instagram, Pinterest, etc.)
+- ✅ **Real-time image preview** and validation
+- ✅ **Image error detection** and fallback handling
 - ✅ Stock management
 - ✅ Pricing and features management
 
 ### Promotion Management
 - ✅ Create and manage promotional banners
+- ✅ **Enhanced banner image upload** with multiple sources
+- ✅ **Live banner preview**
 - ✅ Discount codes and labels
 - ✅ Expiration dates
 - ✅ Active/expired status tracking
