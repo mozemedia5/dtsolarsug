@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Tag, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 export default function AdminPromotions() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -80,7 +81,7 @@ export default function AdminPromotions() {
       image: promotion.image,
       discount: promotion.discount,
       validUntil: promotion.validUntil,
-      code: promotion.code
+      code: promotion.code || ''
     });
     setDialogOpen(true);
   };
@@ -168,13 +169,10 @@ export default function AdminPromotions() {
                 </div>
 
                 <div className="col-span-2">
-                  <Label className="text-slate-300">Banner Image URL</Label>
-                  <Input
+                  <ImageUpload
                     value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-white"
-                    placeholder="/images/promotions/banner.jpg"
-                    required
+                    onChange={(url) => setFormData({ ...formData, image: url })}
+                    label="Banner Image"
                   />
                 </div>
 
@@ -262,6 +260,23 @@ export default function AdminPromotions() {
               </div>
             </CardHeader>
             <CardContent>
+              {/* Promotion Banner Preview */}
+              {promotion.image && (
+                <div className="mb-3 w-full h-40 bg-slate-800 rounded overflow-hidden flex items-center justify-center">
+                  <img
+                    src={promotion.image}
+                    alt={promotion.title}
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      const parent = (e.target as HTMLImageElement).parentElement;
+                      if (parent) {
+                        parent.innerHTML = '<div class="text-slate-600 text-sm">Banner not available</div>';
+                      }
+                    }}
+                  />
+                </div>
+              )}
               <p className="text-slate-400 text-sm mb-3">{promotion.description}</p>
               <div className="space-y-2 mb-4">
                 <div className="flex items-center justify-between">

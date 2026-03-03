@@ -3,8 +3,7 @@ import {
   getAllProducts, 
   createProduct, 
   updateProduct, 
-  deleteProduct,
-  uploadProductImage 
+  deleteProduct
 } from '@/lib/dataService';
 import type { Product } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Package, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -219,13 +219,10 @@ export default function AdminProducts() {
                 </div>
 
                 <div className="col-span-2">
-                  <Label className="text-slate-300">Image URL</Label>
-                  <Input
+                  <ImageUpload
                     value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-white"
-                    placeholder="/images/products/product.jpg"
-                    required
+                    onChange={(url) => setFormData({ ...formData, image: url })}
+                    label="Product Image"
                   />
                 </div>
 
@@ -329,6 +326,23 @@ export default function AdminProducts() {
               </div>
             </CardHeader>
             <CardContent>
+              {/* Product Image Preview */}
+              {product.image && (
+                <div className="mb-3 w-full h-40 bg-slate-800 rounded overflow-hidden flex items-center justify-center">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      const parent = (e.target as HTMLImageElement).parentElement;
+                      if (parent) {
+                        parent.innerHTML = '<div class="text-slate-600 text-sm">Image not available</div>';
+                      }
+                    }}
+                  />
+                </div>
+              )}
               <p className="text-slate-400 text-sm mb-3 line-clamp-2">{product.description}</p>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-orange-500 font-bold text-lg">
