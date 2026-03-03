@@ -9,15 +9,21 @@
 import { 
   collection, 
   getDocs, 
+  getDoc,
+  doc,
+  addDoc,
+  updateDoc,
   query,
   where,
-  orderBy
+  orderBy,
+  increment
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Product, Promotion, Review } from '@/types';
 
 // Flag to use Firebase or local data
-const USE_FIREBASE = false; // Set to true when Firebase is set up
+// Set to true to enable Firebase integration
+const USE_FIREBASE = true; 
 
 /**
  * Get all products from Firestore
@@ -128,6 +134,7 @@ export const getProductReviewsFromFirebase = async (productId: string): Promise<
 
 /**
  * Submit a new review (will be pending until approved by admin)
+ * Also updates the product's average rating and review count
  */
 export const submitReview = async (reviewData: Omit<Review, 'id' | 'verified'>): Promise<boolean> => {
   if (!USE_FIREBASE) {
@@ -142,9 +149,30 @@ export const submitReview = async (reviewData: Omit<Review, 'id' | 'verified'>):
       date: new Date().toISOString()
     };
     
-    // Note: In production, you'd use addDoc here
-    // For now, we'll just log it
-    console.log('Review submitted:', review);
+    // Add the review to the 'reviews' collection
+    await addDoc(collection(db, 'reviews'), review);
+
+    // Update product stats if productId is provided
+    if (reviewData.productId) {
+      const productRef = doc(db, 'products', reviewData.productId);
+      const productDoc = await getDoc(productRef);
+      
+      if (productDoc.exists()) {
+        const productData = productDoc.data();
+        const currentRating = productData.rating || 0;
+        const currentReviews = productData.reviews || 0;
+        
+        // Calculate new average rating
+        const newReviews = currentReviews + 1;
+        const newRating = ((currentRating * currentReviews) + reviewData.rating) / newReviews;
+        
+        await updateDoc(productRef, {
+          rating: newRating,
+          reviews: newReviews
+        });
+      }
+    }
+    
     return true;
   } catch (error) {
     console.error('Error submitting review:', error);
