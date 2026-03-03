@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { products, categoryLabels } from '@/data';
 import type { Product } from '@/types';
+import { ProductImage } from '@/components/shared/ProductImage';
 
 interface ProductsProps {
   onPageChange: (page: string) => void;
@@ -164,12 +165,19 @@ export function Products({ onPageChange }: ProductsProps) {
               >
                 {/* Product Image */}
                 <div 
-                  className="relative aspect-square bg-slate-700 flex items-center justify-center cursor-pointer"
+                  className="relative aspect-square bg-slate-700 overflow-hidden cursor-pointer"
                   onClick={() => setSelectedProduct(product)}
                 >
-                  <div className="w-24 h-24 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <ProductIcon category={product.category} />
-                  </div>
+                  <ProductImage
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                    fallbackIcon={
+                      <div className="w-24 h-24 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center">
+                        <ProductIcon category={product.category} />
+                      </div>
+                    }
+                  />
                   
                   {/* Badges */}
                   <div className="absolute top-2 left-2 flex flex-col gap-1">
@@ -264,10 +272,17 @@ export function Products({ onPageChange }: ProductsProps) {
               
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Product Image */}
-                <div className="aspect-square bg-slate-800 rounded-xl flex items-center justify-center">
-                  <div className="w-32 h-32 bg-gradient-to-br from-slate-700 to-slate-600 rounded-2xl flex items-center justify-center">
-                    <ProductIcon category={selectedProduct.category} className="w-16 h-16" />
-                  </div>
+                <div className="aspect-square bg-slate-800 rounded-xl overflow-hidden">
+                  <ProductImage
+                    src={selectedProduct.image}
+                    alt={selectedProduct.name}
+                    className="w-full h-full"
+                    fallbackIcon={
+                      <div className="w-32 h-32 bg-gradient-to-br from-slate-700 to-slate-600 rounded-2xl flex items-center justify-center">
+                        <ProductIcon category={selectedProduct.category} className="w-16 h-16" />
+                      </div>
+                    }
+                  />
                 </div>
 
                 {/* Product Details */}
