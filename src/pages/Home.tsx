@@ -17,6 +17,7 @@ import { branches } from '@/data';
 import { usePromotions, useFeaturedProducts } from '@/hooks/useFirebaseData';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
+import { ProductImage } from '@/components/shared/ProductImage';
 
 interface HomeProps {
   onPageChange: (page: string) => void;
@@ -186,12 +187,27 @@ export function Home({ onPageChange }: HomeProps) {
                 {activePromotions.map((promo) => (
               <div key={promo.id} className="flex-[0_0_100%] sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] min-w-0">
                 <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 overflow-hidden group cursor-pointer hover:border-orange-500/50 transition-all">
-                  <div className="relative h-40 bg-gradient-to-br from-orange-500/20 to-amber-500/20 flex items-center justify-center">
+                  <div className="relative h-40 bg-gradient-to-br from-orange-500/20 to-amber-500/20 overflow-hidden">
+                    {promo.image ? (
+                      <ProductImage
+                        src={promo.image}
+                        alt={promo.title}
+                        className="w-full h-full"
+                        fallbackIcon={
+                          <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg">
+                            <Star className="w-10 h-10 text-white" />
+                          </div>
+                        }
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                          <Star className="w-10 h-10 text-white" />
+                        </div>
+                      </div>
+                    )}
                     <div className="absolute top-3 right-3">
                       <Badge className="bg-red-500 text-white">{promo.discount}</Badge>
-                    </div>
-                    <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                      <Star className="w-10 h-10 text-white" />
                     </div>
                   </div>
                   <CardContent className="p-4">
@@ -261,10 +277,17 @@ export function Home({ onPageChange }: HomeProps) {
               className="bg-slate-800/50 border-slate-700 overflow-hidden group hover:border-orange-500/50 transition-all cursor-pointer"
               onClick={() => onPageChange('products')}
             >
-              <div className="relative aspect-square bg-slate-700 flex items-center justify-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <ProductIcon category={product.category} />
-                </div>
+              <div className="relative aspect-square bg-slate-700 overflow-hidden">
+                <ProductImage
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                  fallbackIcon={
+                    <div className="w-20 h-20 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center">
+                      <ProductIcon category={product.category} />
+                    </div>
+                  }
+                />
                 {product.rating >= 4.8 && (
                   <div className="absolute top-2 left-2">
                     <Badge className="bg-amber-500 text-white text-[10px]">
