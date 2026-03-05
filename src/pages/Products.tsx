@@ -10,7 +10,9 @@ import {
   Shield,
   Droplets,
   Zap,
-  Battery
+  Battery,
+  Share2,
+  Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,11 +37,56 @@ const categories = [
   { id: 'home-electronics', label: 'Home Electronics', icon: Zap }
 ];
 
+/**
+ * Share a product using the Web Share API (native OS share sheet).
+ * Falls back to copying the link if Web Share API is not available.
+ */
+async function shareProduct(product: Product): Promise<'shared' | 'copied' | 'error'> {
+  const url = `${window.location.origin}${window.location.pathname}?product=${encodeURIComponent(product.id)}`;
+  const shareData: ShareData = {
+    title: `${product.name} — DT Solars Uganda`,
+    text: `Check out this product: ${product.name}\n💰 UGX ${product.price.toLocaleString()}\n\n${product.description.slice(0, 120)}...`,
+    url,
+  };
+
+  // Use native Web Share API if available (mobile Safari, Chrome for Android, etc.)
+  if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+    try {
+      await navigator.share(shareData);
+      return 'shared';
+    } catch (err: any) {
+      // User cancelled share — not an error
+      if (err?.name === 'AbortError') return 'shared';
+      return 'error';
+    }
+  }
+
+  // Fallback: copy link to clipboard
+  try {
+    await navigator.clipboard.writeText(url);
+    return 'copied';
+  } catch {
+    // Last resort: execCommand
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    return 'copied';
+  }
+}
+
 export function Products({ onPageChange }: ProductsProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [likedProducts, setLikedProducts] = useState<Set<string>>(new Set());
+  const [sharedProductId, setSharedProductId] = useState<string | null>(null);
+  const [shareFeedback, setShareFeedback] = useState<string>('');
   
   // Fetch products from Firebase
   const { products, loading, error } = useProducts();
@@ -61,6 +108,21 @@ export function Products({ onPageChange }: ProductsProps) {
       }
       return newSet;
     });
+  };
+
+  const handleShare = async (product: Product, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setSharedProductId(product.id);
+    const result = await shareProduct(product);
+    if (result === 'copied') {
+      setShareFeedback('Link copied to clipboard!');
+      setTimeout(() => {
+        setSharedProductId(null);
+        setShareFeedback('');
+      }, 2500);
+    } else {
+      setTimeout(() => setSharedProductId(null), 1500);
+    }
   };
 
   const formatPrice = (price: number) => {
@@ -176,6 +238,14 @@ export function Products({ onPageChange }: ProductsProps) {
           )}
         </div>
 
+        {/* Clipboard feedback toast */}
+        {shareFeedback && (
+          <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-slate-800 border border-slate-600 text-white px-4 py-2 rounded-full text-sm flex items-center gap-2 shadow-xl animate-fade-in">
+            <Check className="w-4 h-4 text-green-400" />
+            {shareFeedback}
+          </div>
+        )}
+
         {/* Products Grid */}
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -215,22 +285,37 @@ export function Products({ onPageChange }: ProductsProps) {
                     )}
                   </div>
 
-                  {/* Like Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLike(product.id);
-                    }}
-                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-900/80 flex items-center justify-center hover:bg-slate-900 transition-colors"
-                  >
-                    <Heart 
-                      className={`w-4 h-4 ${
-                        likedProducts.has(product.id) 
-                          ? 'text-red-500 fill-red-500' 
-                          : 'text-slate-400'
-                      }`} 
-                    />
-                  </button>
+                  {/* Like + Share buttons */}
+                  <div className="absolute top-2 right-2 flex flex-col gap-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(product.id);
+                      }}
+                      className="w-8 h-8 rounded-full bg-slate-900/80 flex items-center justify-center hover:bg-slate-900 transition-colors"
+                      aria-label="Like product"
+                    >
+                      <Heart 
+                        className={`w-4 h-4 ${
+                          likedProducts.has(product.id) 
+                            ? 'text-red-500 fill-red-500' 
+                            : 'text-slate-400'
+                        }`} 
+                      />
+                    </button>
+                    <button
+                      onClick={(e) => handleShare(product, e)}
+                      className="w-8 h-8 rounded-full bg-slate-900/80 flex items-center justify-center hover:bg-orange-500/80 transition-colors"
+                      aria-label="Share product"
+                      title="Share this product"
+                    >
+                      {sharedProductId === product.id ? (
+                        <Check className="w-4 h-4 text-green-400" />
+                      ) : (
+                        <Share2 className="w-4 h-4 text-slate-400" />
+                      )}
+                    </button>
+                  </div>
 
                   {/* Category Badge */}
                   <div className="absolute bottom-2 left-2">
@@ -256,15 +341,15 @@ export function Products({ onPageChange }: ProductsProps) {
                   </div>
 
                   <div className="flex items-center justify-between mt-2">
-                    <p className="text-orange-400 font-semibold">{formatPrice(product.price)}</p>
+                    <p className="text-orange-400 font-semibold text-xs sm:text-sm">{formatPrice(product.price)}</p>
                     <Button 
                       size="sm"
                       disabled={!product.inStock}
                       onClick={() => onPageChange('preorder')}
-                      className="h-8 px-3 bg-orange-500 hover:bg-orange-600 text-white text-xs"
+                      className="h-8 px-2 sm:px-3 bg-orange-500 hover:bg-orange-600 text-white text-xs"
                     >
-                      <ShoppingCart className="w-3 h-3 mr-1" />
-                      Order
+                      <ShoppingCart className="w-3 h-3 sm:mr-1" />
+                      <span className="hidden sm:inline">Order</span>
                     </Button>
                   </div>
                 </CardContent>
@@ -290,7 +375,7 @@ export function Products({ onPageChange }: ProductsProps) {
           {selectedProduct && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-xl">{selectedProduct.name}</DialogTitle>
+                <DialogTitle className="text-xl pr-8">{selectedProduct.name}</DialogTitle>
               </DialogHeader>
               
               <div className="grid md:grid-cols-2 gap-6">
@@ -356,6 +441,7 @@ export function Products({ onPageChange }: ProductsProps) {
                       variant="outline"
                       onClick={() => toggleLike(selectedProduct.id)}
                       className="border-slate-700 text-slate-400 hover:text-red-400 hover:border-red-500/50"
+                      title="Like"
                     >
                       <Heart 
                         className={`w-4 h-4 ${
@@ -365,7 +451,28 @@ export function Products({ onPageChange }: ProductsProps) {
                         }`} 
                       />
                     </Button>
+                    {/* Share button in dialog */}
+                    <Button
+                      variant="outline"
+                      onClick={() => handleShare(selectedProduct)}
+                      className="border-slate-700 text-slate-400 hover:text-orange-400 hover:border-orange-500/50 relative"
+                      title="Share this product"
+                    >
+                      {sharedProductId === selectedProduct.id ? (
+                        <Check className="w-4 h-4 text-green-400" />
+                      ) : (
+                        <Share2 className="w-4 h-4" />
+                      )}
+                    </Button>
                   </div>
+
+                  {/* Share feedback inside dialog */}
+                  {shareFeedback && sharedProductId === selectedProduct.id && (
+                    <div className="flex items-center gap-2 text-sm text-green-400 bg-green-900/20 border border-green-900/40 rounded-lg px-3 py-2">
+                      <Check className="w-4 h-4" />
+                      {shareFeedback}
+                    </div>
+                  )}
                 </div>
               </div>
             </>
