@@ -187,3 +187,47 @@ export const submitReview = async (reviewData: Omit<Review, 'id' | 'verified'>):
     return false;
   }
 };
+
+/**
+ * Submit a new pre-order to Firestore
+ */
+export const submitPreOrder = async (orderData: any): Promise<string | null> => {
+  if (!USE_FIREBASE) return null;
+  
+  try {
+    const order = {
+      ...orderData,
+      status: 'pending',
+      date: new Date().toISOString()
+    };
+    
+    const docRef = await addDoc(collection(db, 'preorders'), order);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error submitting pre-order:', error);
+    return null;
+  }
+};
+
+/**
+ * Get pre-orders by customer phone number
+ */
+export const getPreOrdersByPhoneFromFirebase = async (phone: string): Promise<any[]> => {
+  if (!USE_FIREBASE) return [];
+  
+  try {
+    const q = query(
+      collection(db, 'preorders'),
+      where('customerPhone', '==', phone),
+      orderBy('date', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching pre-orders by phone:', error);
+    return [];
+  }
+};

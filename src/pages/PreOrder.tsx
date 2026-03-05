@@ -26,7 +26,7 @@ import { submitReview } from '@/lib/firebaseService';
 import type { PreOrder } from '@/types';
 
 export function PreOrderPage() {
-  const { preOrders, addPreOrder } = usePreOrders();
+  const { getPreOrdersByPhone, addPreOrder } = usePreOrders();
   const [formData, setFormData] = useState({
     productId: '',
     quantity: 1,
@@ -63,7 +63,7 @@ export function PreOrderPage() {
     // Simulate submission
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    const newOrder = addPreOrder({
+    const newOrder = await addPreOrder({
       productId: formData.productId,
       productName: selectedProduct.name,
       quantity: formData.quantity,
@@ -94,11 +94,18 @@ export function PreOrderPage() {
     setTimeout(() => setShowSuccess(false), 10000);
   };
 
-  const handleTrackOrders = () => {
+  const handleTrackOrders = async () => {
     if (!trackPhone) return;
-    const orders = preOrders.filter(o => o.customerPhone === trackPhone);
-    setTrackedOrders(orders);
-    setHasTracked(true);
+    setIsSubmitting(true);
+    try {
+      const orders = await getPreOrdersByPhone(trackPhone);
+      setTrackedOrders(orders);
+      setHasTracked(true);
+    } catch (err) {
+      console.error('Tracking error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {

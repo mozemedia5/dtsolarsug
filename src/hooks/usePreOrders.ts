@@ -1,42 +1,26 @@
 import { useCallback } from 'react';
 import type { PreOrder } from '@/types';
-import { useLocalStorage } from './useLocalStorage';
+import { submitPreOrder, getPreOrdersByPhoneFromFirebase } from '@/lib/firebaseService';
 
 export function usePreOrders() {
-  const [preOrders, setPreOrders] = useLocalStorage<PreOrder[]>('dt-preorders', []);
-
-  const addPreOrder = useCallback((preOrder: Omit<PreOrder, 'id' | 'date' | 'status'>) => {
-    const newPreOrder: PreOrder = {
+  const addPreOrder = useCallback(async (preOrder: Omit<PreOrder, 'id' | 'date' | 'status'>) => {
+    const orderId = await submitPreOrder(preOrder);
+    if (!orderId) throw new Error('Failed to submit pre-order to Firestore');
+    
+    return {
       ...preOrder,
-      id: `PO-${Date.now()}`,
+      id: orderId,
       date: new Date().toISOString(),
-      status: 'pending'
+      status: 'pending' as const
     };
-    setPreOrders(prev => [newPreOrder, ...prev]);
-    return newPreOrder;
-  }, [setPreOrders]);
+  }, []);
 
-  const updatePreOrderStatus = useCallback((id: string, status: PreOrder['status']) => {
-    setPreOrders(prev =>
-      prev.map(order =>
-        order.id === id ? { ...order, status } : order
-      )
-    );
-  }, [setPreOrders]);
-
-  const getPreOrdersByBranch = useCallback((branchId: string) => {
-    return preOrders.filter(order => order.branchId === branchId);
-  }, [preOrders]);
-
-  const getPreOrdersByPhone = useCallback((phone: string) => {
-    return preOrders.filter(order => order.customerPhone === phone);
-  }, [preOrders]);
+  const getPreOrdersByPhone = useCallback(async (phone: string) => {
+    return await getPreOrdersByPhoneFromFirebase(phone);
+  }, []);
 
   return {
-    preOrders,
     addPreOrder,
-    updatePreOrderStatus,
-    getPreOrdersByBranch,
     getPreOrdersByPhone
   };
 }
