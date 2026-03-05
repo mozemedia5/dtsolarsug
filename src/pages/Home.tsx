@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { branches } from '@/data';
-import { usePromotions, useFeaturedProducts, useProducts } from '@/hooks/useFirebaseData';
+import { usePromotions, useProducts } from '@/hooks/useFirebaseData';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { ProductImage } from '@/components/shared/ProductImage';
@@ -229,7 +229,7 @@ export function Home({ onPageChange }: HomeProps) {
                   </CardContent>
                 </Card>
               </div>
-            )))}
+            ))}
           </div>
         </div>
 

@@ -63,21 +63,30 @@ export const getProductsByCategoryFromFirebase = async (category: string): Promi
 
 /**
  * Get active promotions
+ * Fetches all promotions and filters client-side to handle both
+ * date-only strings (e.g., "2025-12-31") and ISO timestamps.
  */
 export const getActivePromotionsFromFirebase = async (): Promise<Promotion[]> => {
   if (!USE_FIREBASE) return [];
   
   try {
-    const now = new Date().toISOString();
-    const q = query(
-      collection(db, 'promotions'),
-      where('validUntil', '>', now)
-    );
-    const promotionsSnapshot = await getDocs(q);
-    return promotionsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as Promotion));
+    // Fetch ALL promotions then filter client-side (avoids Firestore index issues
+    // and works regardless of whether validUntil is stored as date or ISO string)
+    const promotionsSnapshot = await getDocs(collection(db, 'promotions'));
+    const now = new Date();
+    return promotionsSnapshot.docs
+      .map(docSnap => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      } as Promotion))
+      .filter(promo => {
+        if (!promo.validUntil) return true; // no expiry = always active
+        try {
+          return new Date(promo.validUntil) > now;
+        } catch {
+          return true;
+        }
+      });
   } catch (error) {
     console.error('Error fetching promotions from Firebase:', error);
     return [];
