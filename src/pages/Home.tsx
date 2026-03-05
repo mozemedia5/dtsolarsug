@@ -33,7 +33,7 @@ export function Home({ onPageChange }: HomeProps) {
   const { promotions: activePromotions, loading: promotionsLoading } = usePromotions();
   const { products: allProducts, loading: productsLoading } = useProducts();
   
-  // Use all products instead of just featured (rating >= 4.7)
+  // Display first 6 products (or all if less than 6)
   const featuredProducts = allProducts.slice(0, 6);
 
   const scrollPrev = useCallback(() => {
@@ -229,7 +229,7 @@ export function Home({ onPageChange }: HomeProps) {
                   </CardContent>
                 </Card>
               </div>
-            ))}
+            )))}
           </div>
         </div>
 
@@ -271,7 +271,7 @@ export function Home({ onPageChange }: HomeProps) {
         {productsLoading ? (
           <div className="text-center text-slate-400 py-12">Loading products...</div>
         ) : featuredProducts.length === 0 ? (
-          <div className="text-center text-slate-400 py-12">No featured products available</div>
+          <div className="text-center text-slate-400 py-12">No products available yet. Check back soon!</div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           {featuredProducts.map((product) => (
