@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { branches } from '@/data';
-import { usePromotions, useFeaturedProducts } from '@/hooks/useFirebaseData';
+import { usePromotions, useFeaturedProducts, useProducts } from '@/hooks/useFirebaseData';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { ProductImage } from '@/components/shared/ProductImage';
@@ -31,7 +31,10 @@ export function Home({ onPageChange }: HomeProps) {
   
   // Fetch data from Firebase
   const { promotions: activePromotions, loading: promotionsLoading } = usePromotions();
-  const { featuredProducts, loading: productsLoading } = useFeaturedProducts();
+  const { products: allProducts, loading: productsLoading } = useProducts();
+  
+  // Use all products instead of just featured (rating >= 4.7)
+  const featuredProducts = allProducts.slice(0, 6);
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
@@ -288,7 +291,7 @@ export function Home({ onPageChange }: HomeProps) {
                     </div>
                   }
                 />
-                {product.rating >= 4.8 && (
+                {(product.rating || 0) >= 4.8 && (
                   <div className="absolute top-2 left-2">
                     <Badge className="bg-amber-500 text-white text-[10px]">
                       <Star className="w-3 h-3 mr-1" />
@@ -301,8 +304,8 @@ export function Home({ onPageChange }: HomeProps) {
                 <h3 className="font-medium text-white text-sm truncate">{product.name}</h3>
                 <div className="flex items-center gap-1 mt-1">
                   <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                  <span className="text-xs text-slate-400">{product.rating}</span>
-                  <span className="text-xs text-slate-600">({product.reviews})</span>
+                  <span className="text-xs text-slate-400">{(product.rating || 0).toFixed(1)}</span>
+                  <span className="text-xs text-slate-600">({product.reviews || 0})</span>
                 </div>
                 <p className="text-orange-400 font-semibold mt-1">{formatPrice(product.price)}</p>
               </CardContent>
